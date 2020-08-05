@@ -29,7 +29,7 @@ class NeuralNetClassifier:
         self.epochs = epochs
 
         self.le = LabelEncoder()
-        self.oe = OneHotEncoder
+        self.oe = OneHotEncoder()
 
     def build(self):
         model = Sequential()
@@ -46,13 +46,17 @@ class NeuralNetClassifier:
 
         self.model = model
 
+    def process_y(self,y):
+        y = self.le.fit_transform(y)
+        y = y.reshape(-1,1)
+        y = self.oe.fit_transform(y).toarray()
+        return y
+
 
     def process_data(self):
-        self.train_y = self.le.fit_transform(self.train_y )
-        self.train_y = self.oe.fit_transform(self.train_y.reshape(-1,1)).toarray()
+        self.train_y = self.process_y(self.train_y)
 
-        self.test_y = self.le.fit_transform(self.test_y )
-        self.test_y = self.oe.fit_transform(self.test_y.reshape(-1,1)).toarray()
+        self.test_y = self.process_y(self.test_y)
 
         self.input_shape = self.train_X.shape
         self.num_classes = self.train_y.shape[1]
@@ -60,12 +64,16 @@ class NeuralNetClassifier:
 
         self.build()
 
-    def fit_model(self):
+    def fit_model(self, save_model = False, path_to_save='../models/'):
         self.process_data()
 
         history = self.model.fit( self.train_X, self.train_y, batch_size= self.batch_size, epochs= self.epochs,
                               verbose=1, validation_data=(self.test_X, self.test_y ))
+
         print(history.history['accuracy'])
+        if save_model:
+            self.model.save(path_to_save+"nn_model.h5")
+            print("Saved model to disk")
 
     def predict_model(self, image):
         pass
@@ -108,8 +116,8 @@ class MLClassifier:
 
 
 data_path = '../dataset/saved_arrays/embeddings-dataset.npz'
-# NN1 = NeuralNetClassifier(data_path)
-# NN1.fit_model()
+NN1 = NeuralNetClassifier(data_path)
+NN1.fit_model(save_model=True)
 
-ml1 = MLClassifier("DecisionTree", data_path)
+ml1 = MLClassifier("SupportVector", data_path)
 ml1.fit_model()
