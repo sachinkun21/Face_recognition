@@ -79,13 +79,11 @@ class NeuralNetClassifier:
         pass
 
 
-
 class MLClassifier:
+
     def __init__(self,classifier_type, embedding_path):
-        self.svc= SVC(kernel='linear', probability=True)
-        self.rfc = RandomForestClassifier(n_estimators = 100)
-        self.dtc = DecisionTreeClassifier()
-        self.model = classifier_type
+        self.model_type = classifier_type
+        self.model = None
         self.train_X, self.train_y, self.test_X, self.test_y = load_array(embedding_path)
         self.le = LabelEncoder()
 
@@ -95,29 +93,31 @@ class MLClassifier:
 
     def fit_model(self):
         self.process_data()
-        print("-------Training {} classifier-------".format(self.model))
-        if self.model=='RandomForest':
-            self.rfc.fit(self.train_X,self.train_y)
-            print("Training Accuracy", self.rfc.score(self.train_X,self.train_y))
-            print("Validation Accuracy", self.rfc.score(self.test_X, self.test_y))
 
-        elif self.model=='SupportVector':
-            self.svc.fit(self.train_X,self.train_y)
-            print("Training Accuracy", self.svc.score(self.train_X,self.train_y))
-            print("Validation Accuracy", self.svc.score(self.test_X, self.test_y))
+        if self.model_type == 'RandomForest':
+            self.model = RandomForestClassifier(n_estimators = 100)
+        elif self.model_type == 'SupportVector':
+            self.model = SVC(kernel='linear', probability=True)
+        elif self.model_type == 'DecisionTree':
+            self.model = DecisionTreeClassifier()
+        else:
+            return  "Incorrect ML Model type"
 
-        elif self.model=='DecisionTree':
-            self.dtc.fit(self.train_X,self.train_y)
-            print("Training Accuracy", self.dtc.score(self.train_X,self.train_y))
-            print("Validation Accuracy", self.dtc.score(self.test_X, self.test_y))
+        print("-------Training {} classifier-------".format(self.model_type))
+        self.model.fit(self.train_X,self.train_y)
+        print("Training Accuracy", self.model.score(self.train_X,self.train_y))
+        print("Validation Accuracy", self.model.score(self.test_X, self.test_y))
+
+    def predict(self, path_to_image):
+        pass
 
 
 
 
 
 data_path = '../dataset/saved_arrays/embeddings-dataset.npz'
-NN1 = NeuralNetClassifier(data_path)
-NN1.fit_model(save_model=True)
+# NN1 = NeuralNetClassifier(data_path)
+# NN1.fit_model(save_model=True)
 
 ml1 = MLClassifier("SupportVector", data_path)
 ml1.fit_model()
