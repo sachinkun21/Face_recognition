@@ -3,6 +3,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import  Adam
 
+
 # for machine learning models
 from sklearn.svm import  SVC
 from sklearn.ensemble import RandomForestClassifier
@@ -14,16 +15,16 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 
 from keras.utils import to_categorical
-
 from src.load_data import load_array
+import  numpy as np
 
 
 class NeuralNetClassifier:
-    def __init__(self, embedding_path,batch_size = 8, epochs = 5):
+    def __init__(self,batch_size = 8, epochs = 5):
         self.input_shape = None
         self.num_classes = None
         self.model = None
-        self.train_X, self.train_y, self.test_X, self.test_y = load_array(embedding_path)
+        self.train_X, self.train_y, self.test_X, self.test_y = None, None, None, None
 
         self.batch_size = batch_size
         self.epochs = epochs
@@ -52,7 +53,6 @@ class NeuralNetClassifier:
         y = self.oe.fit_transform(y).toarray()
         return y
 
-
     def process_data(self):
         self.train_y = self.process_y(self.train_y)
 
@@ -64,34 +64,38 @@ class NeuralNetClassifier:
 
         self.build()
 
-    def fit_model(self, save_model = False, path_to_save='../models/'):
+    def fit_model(self,embedding_path ):
+        self.train_X, self.train_y, self.test_X, self.test_y = load_array(embedding_path)
         self.process_data()
 
         history = self.model.fit( self.train_X, self.train_y, batch_size= self.batch_size, epochs= self.epochs,
                               verbose=1, validation_data=(self.test_X, self.test_y ))
 
         print(history.history['accuracy'])
-        if save_model:
-            self.model.save(path_to_save+"nn_model.h5")
-            print("Saved model to disk")
 
-    def predict_model(self, image):
-        pass
+    def save_model(self, path_to_save='../models/'):
+        self.model.save(path_to_save+"nn_model.h5")
+        print("Saved model to disk")
+
+    def predict_face(self, embedding):
+        self.model.predict(embedding)
+
+
 
 
 class MLClassifier:
-
-    def __init__(self,classifier_type, embedding_path):
+    def __init__(self,classifier_type):
         self.model_type = classifier_type
         self.model = None
-        self.train_X, self.train_y, self.test_X, self.test_y = load_array(embedding_path)
+        self.train_X, self.train_y, self.test_X, self.test_y = None, None, None, None
         self.le = LabelEncoder()
 
     def process_data(self):
         self.train_y = self.le.fit_transform(self.train_y)
         self.test_y = self.le.fit_transform(self.test_y)
 
-    def fit_model(self):
+    def fit_model(self,embedding_path):
+        self.train_X, self.train_y, self.test_X, self.test_y = load_array(embedding_path)
         self.process_data()
 
         if self.model_type == 'RandomForest':
@@ -108,16 +112,20 @@ class MLClassifier:
         print("Training Accuracy", self.model.score(self.train_X,self.train_y))
         print("Validation Accuracy", self.model.score(self.test_X, self.test_y))
 
-    def predict(self, path_to_image):
-        pass
+    def predict_face(self, embedding):
+        embedding = np.expand_dims(embedding,axis=0)
+        predicted = self.model.predict(embedding)
+        predicted = self.le.inverse_transform(predicted)
+        return predicted
 
 
 
 
 
-data_path = '../dataset/saved_arrays/embeddings-dataset.npz'
+#
+# data_path = '../dataset/saved_arrays/embeddings-dataset.npz'
 # NN1 = NeuralNetClassifier(data_path)
 # NN1.fit_model(save_model=True)
-
-ml1 = MLClassifier("SupportVector", data_path)
-ml1.fit_model()
+#
+# ml1 = MLClassifier("SupportVector", data_path)
+# ml1.fit_model()
