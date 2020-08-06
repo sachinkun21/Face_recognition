@@ -12,11 +12,13 @@ def predict_ml(image_path, input_name, model_path, le_path):
     # loading Label
     loaded_model = pickle.load(open(model_path, 'rb'))
     prediction = loaded_model.predict(face_embedding)
+    probability= loaded_model.predict_proba(face_embedding)[0]
 
     # loading label-Enocoder
     labelenocoder = pickle.load(open(le_path, 'rb'))
     prediction = labelenocoder.inverse_transform(prediction)
 
-    print("Predicted {} , Actual {}".format(prediction,input_name))
+
+    print("Predicted {} , Actual {} with probability of {}%".format(prediction, input_name, max(probability)*100))
 
 predict_ml('dataset/train/jerry_seinfeld/httpgraphicsnytimescomimagessectionmoviesfilmographyWireImagejpg.jpg', "jerry","models/RandomForest.sav", "models/LabelEncoder.sav")
