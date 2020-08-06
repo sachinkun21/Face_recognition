@@ -3,6 +3,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import  Adam
 
+import pickle
 
 # for machine learning models
 from sklearn.svm import  SVC
@@ -111,6 +112,11 @@ class MLClassifier:
         self.model.fit(self.train_X,self.train_y)
         print("Training Accuracy", self.model.score(self.train_X,self.train_y))
         print("Validation Accuracy", self.model.score(self.test_X, self.test_y))
+        print("---saving model in models directory---")
+        filename = "models/{}.sav".format(self.model_type)
+        pickle.dump(self.model, open(filename, 'wb'))
+        pickle.dump(self.le, open('models/LabelEncoder.sav', 'wb'))
+
 
     def predict_face(self, embedding):
         embedding = np.expand_dims(embedding,axis=0)
