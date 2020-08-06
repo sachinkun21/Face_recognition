@@ -17,6 +17,7 @@ def get_embedding(face_pixels):
     # standardize pixel values across channels (global)
     mean, std = face_pixels.mean(), face_pixels.std()
     face_pixels = (face_pixels - mean) / std
+
     # transform face into one sample
     samples = np.expand_dims(face_pixels, axis=0)
 

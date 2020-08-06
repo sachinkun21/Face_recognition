@@ -20,5 +20,6 @@ def predict_ml(image_path, input_name, model_path, le_path):
 
 
     print("Predicted {} , Actual {} with probability of {}%".format(prediction, input_name, max(probability)*100))
+    return prediction,max(probability)*100
 
-predict_ml('dataset/train/jerry_seinfeld/httpgraphicsnytimescomimagessectionmoviesfilmographyWireImagejpg.jpg', "jerry","models/RandomForest.sav", "models/LabelEncoder.sav")
+predict_ml('vikings-ragnar1200.jpg', "ragnar","models/RandomForest.sav", "models/LabelEncoder.sav")

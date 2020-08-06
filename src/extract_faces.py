@@ -17,9 +17,9 @@ def detect_face(image_array, num_of_faces = 1):
 	results = detector.detect_faces(image_array)
 	list_of_faces = []
 
-	for i in results[:num_of_faces]:
+	for res in results[:num_of_faces]:
 		# extract the bounding box from the first face
-		x1, y1, width, height = results[0]['box']
+		x1, y1, width, height = res['box']
 
 		# convert the co-ordinates into cropping format
 		x1, y1 = abs(x1), abs(y1)
@@ -34,11 +34,15 @@ def detect_face(image_array, num_of_faces = 1):
 
 
 # extract a single face from a given photograph
-def crop_faces(file, required_size=(160, 160), num_of_faces = 1):
+def crop_faces(file, file_type = "path",required_size=(160, 160), num_of_faces = 1):
 
 	# load image from file
-	image = Image.open(file)
-
+	if file_type == "path":
+		image = Image.open(file)
+	elif file_type == "base64":
+		image = Image.fromarray(file.astype('uint8'), 'RGB')
+	else:
+		return "incorrect file_type"
 	# convert to RGB, if needed
 	image = image.convert('RGB')
 
@@ -50,7 +54,6 @@ def crop_faces(file, required_size=(160, 160), num_of_faces = 1):
 
 	# new list to store resized faces
 	list_of_resized_faces = []
-
 	for face in list_of_faces:
 		# resize array to the model size by reading the array into Pil image object
 		image = Image.fromarray(face)
@@ -61,7 +64,10 @@ def crop_faces(file, required_size=(160, 160), num_of_faces = 1):
 		# add face array to new list
 		list_of_resized_faces.append(face_array)
 
-	return list_of_resized_faces[0] if num_of_faces == 1 else list_of_resized_faces
+	if len(list_of_resized_faces)>0:
+		return list_of_resized_faces[0] if num_of_faces == 1 else list_of_resized_faces
+	else:
+		return None
 
 
 def save_face(array, name = "Cropped Face.jpg"):
