@@ -4,6 +4,8 @@ import numpy as np
 from src.extract_faces import crop_faces
 from src.extract_faces import save_face
 
+from src.embeddings import get_embeddings
+
 
 # load saved_arrays and extract faces for all saved_arrays in a directory
 def load_faces(directory):
@@ -53,7 +55,7 @@ def load_dataset(directory):
 
 
 # Calls the load data-set on directories passed as train and test. Saves the output in npz format
-def save_array(train_dir , test_dir = None, path_to_save = '../dataset/saved_arrays/faces-dataset.npz'):
+def save_face_array(train_dir , test_dir = None, path_to_save = '../dataset/saved_arrays/faces-dataset.npz'):
     train_X, train_y = load_dataset(train_dir)
 
     if test_dir is not None:
@@ -76,11 +78,79 @@ def load_array(path_to_npz):
 
 
 
+def create_embeddings(input_array_path, output_array_path):
+    train_X, train_y, test_X, test_y = load_array(path_to_npz=input_array_path)
+
+    print("-------Creating Embeddings of shape-------")
+    embedding_train = []
+    embedding_test = []
+    for cropped_face in train_X:
+        embedding = get_embedding(cropped_face)
+        embedding_train.append(embedding)
+
+    for cropped_face in test_X:
+        embedding = get_embedding(cropped_face)
+        embedding_test.append(embedding)
+
+    embedding_train = np.asarray(embedding_train)
+    embedding_test = np.asarray(embedding_test)
+
+    print(embedding_train.shape, embedding_test.shape)
+    print("*********Successfully created. Saving Embedding to npz array*********")
+    np.savez_compressed(output_array_path, embedding_train, train_y, embedding_test, test_y)
+
+
+def add_embedding(new_train_images, new_test_images , saved_embedding_path):
+    embed_train_X, embed_train_y, embed_test_X, embed_test_y = load_array(path_to_npz=saved_embedding_path)
+
+    new_embedding_train = []
+    new_embedding_test = []
+
+    new_face_X, new_face_y = load_dataset(new_train_images)
+    new_test_X, new_test_y = load_dataset(new_test_images)
+
+    for cropped_face in new_face_X:
+        embedding = get_embeddings(cropped_face)
+        new_embedding_train.append(embedding)
+
+    for cropped_face in new_test_X:
+        embedding = get_embeddings(cropped_face)
+        new_embedding_test.append(embedding)
+
+    new_embedding_train = np.asarray(new_embedding_train)
+    new_embedding_test = np.asarray(new_embedding_test)
+
+    final_embedding_train = np.concatenate([embed_train_X, new_embedding_train])
+    final_embedding_test = np.concatenate( [embed_test_X, new_embedding_test])
+
+    # labels:
+    final_train_y = np.concatenate([embed_train_y, new_face_y])
+    final_test_y = np.concatenate([embed_test_y, new_test_y])
+
+    # print((embed_train_X).shape, (embed_test_X).shape, (embed_train_y).shape, (embed_test_y).shape)
+    # print((final_embedding_train).shape, (final_embedding_test).shape, (final_train_y).shape, (final_test_y).shape)
+
+    print("*********Successfully created. Saving new + old Embedding to npz array*********")
+    np.savez_compressed(saved_embedding_path, final_embedding_train, final_train_y, final_embedding_test, final_test_y)
+
+    # fitting new model
+    # ml_model = MLClassifier('RandomForest')
+    #
+    # # calling fit_model on new embedding
+    # ml_model.fit_model(saved_embedding_path)
+
+
+# add new embeddings function test
+# embed_path = '/Users/sachinkun21/PycharmProjects/FaceRecog/dataset/saved_arrays/embeddings-dataset.npz'
+# train_dir= '/Users/sachinkun21/PycharmProjects/FaceRecog/dataset/train'
+# test_dir = '/Users/sachinkun21/PycharmProjects/FaceRecog/dataset/val'
+# add_embedding(train_dir,test_dir, embed_path)
+
 
 # function 1
-#faces = load_faces('/Users/sachinkun21/PycharmProjects/FaceRecog/dataset/train/ben_afflek/')
-#print(len(faces))
-#save_face(faces[0],"face_0.jpg")
+# faces = load_faces('/Users/sachinkun21/PycharmProjects/FaceRecog/dataset/train/ben_afflek/')
+# print(len(faces))
+# save_face(faces[0],"face_0.jpg")
 
 # function 2
 #load_dataset('/Users/sachinkun21/PycharmProjects/FaceRecog/dataset/train/')

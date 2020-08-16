@@ -1,8 +1,8 @@
-from src.load_data import save_array,load_array
-from src.embeddings import create_embeddings,get_embedding
+from src.load_data import save_face_array, load_dataset
+from src.embeddings import get_embeddings
 from src.classifier import NeuralNetClassifier,MLClassifier
 from src.extract_faces import crop_faces
-import  numpy as np
+import numpy as np
 
 
 
@@ -30,11 +30,13 @@ def add_new_person():
 
 ### Prediction Code
 ml_model = MLClassifier('RandomForest')
+
+# calling fit_model on new embedding
 ml_model.fit_model(embedding_path)
 
 def predict_ml(image_path, input_name):
     face_array = crop_faces(image_path)
-    face_embedding = get_embedding(face_array)
+    face_embedding = get_embeddings(face_array)
     prediction = ml_model.predict_face(face_embedding)
     print("Predicted {} , Actual {}".format(prediction,input_name))
 
@@ -45,3 +47,4 @@ predict_ml('dataset/train/mindy_kaling/httpimagesnymagcomimagesdailymindykalingx
 
 # dl_model = NeuralNetClassifier(batch_size = 8, epochs = 5)
 # dl_model.fit_model(embedding_path)
+

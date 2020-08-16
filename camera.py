@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 from mtcnn.mtcnn import MTCNN
-from src.embeddings import get_embedding
+from src.embeddings import get_embeddings
 
 import pickle
 
@@ -12,8 +12,8 @@ detector = MTCNN()
 cap = cv2.VideoCapture(0)
 
 def predict_ml(face_array, input_name, model_path, le_path):
-    face_embedding = get_embedding(face_array)
-    print(face_embedding)
+    face_embedding = get_embeddings(face_array)
+
     face_embedding = np.expand_dims(face_embedding, axis=0)
 
     # loading Label
@@ -50,6 +50,7 @@ def detect_face(image_array):
     return list_of_faces
 
 
+prev_embed = None
 frame_count = 0
 while True:
     ret, frame = cap.read()
@@ -58,16 +59,19 @@ while True:
     # Get all faces on current frame
     faces = detect_face(frame)
 
+    if prev_embed is not None:
 
-    for face in faces:
+     for face in faces:
         if len(face) > 0:
 
             crop_face = face[0]
             face_co_ords = face[1]
+            if prev_embed is not None:
 
-            cv2.rectangle(frame,face_co_ords[:2], face_co_ords[2:], (255, 0, 0), 2)
-            pred, prob = predict_ml(crop_face, "ragnar", "models/RandomForest.sav", "models/LabelEncoder.sav")
-            label = pred[0]+" "+ str(prob)
+                cv2.rectangle(frame,face_co_ords[:2], face_co_ords[2:], (255, 0, 0), 2)
+
+                pred, prob = predict_ml(crop_face, "ragnar", "models/RandomForest.sav", "models/LabelEncoder.sav")
+                label = pred[0]+" "+ str(prob)
 
             cv2.putText(frame, label,  (face_co_ords[0],face_co_ords[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.95, (255, 255, 255), 1)
 
