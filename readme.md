@@ -8,3 +8,5 @@ to Run the code
 2. install packages from requirements file using:
 
      `pip install -r requirements.txt`
+
+3. Going to add face similarity soon
