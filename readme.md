@@ -11,4 +11,3 @@ to Run the code
 
 3. Going to add face similarity soon
 
-Need to 
