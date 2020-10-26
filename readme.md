@@ -9,5 +9,5 @@ to Run the code
 
      `pip install -r requirements.txt`
 
-3. Going to add face similarity soon
+3. Going to add face similarity soo.
 
