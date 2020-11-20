@@ -9,5 +9,5 @@ to Run the code
 
      `pip install -r requirements.txt`
 
-To add face similarity 
+To add face similarity cosine 
 
